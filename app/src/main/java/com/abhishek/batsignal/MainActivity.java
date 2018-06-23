@@ -1,9 +1,13 @@
 package com.abhishek.batsignal;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.CallLog;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -39,9 +43,8 @@ public class MainActivity extends AppCompatActivity {
         int name = managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
         int type = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
 
-        while (managedCursor.moveToNext())
-        {
-            Log.d("Abhishek",managedCursor.getString(number)+" "+ managedCursor.getString(name) );
+        while (managedCursor.moveToNext()) {
+            Log.d("Abhishek", managedCursor.getString(number) + " " + managedCursor.getString(name));
         }
 
         managedCursor.moveToLast();
@@ -79,10 +82,11 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     Cursor managedCursor = this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
                     //printCallLogs(managedCursor);
 
-                    core=new Core(managedCursor);
+                    core = new Core(managedCursor, vibrator);
                     core.run();
                 } else
                     Log.d("Abhishek", "Permission denied");
@@ -95,9 +99,11 @@ public class MainActivity extends AppCompatActivity {
 class Core {
     private String[] contactList = {"dad", "omkar", "mom"};
     private Cursor managedCursor;
+    private Vibrator vibrator;
 
-    public Core(Cursor cursor) {
+    public Core(Cursor cursor, Vibrator vibrator) {
         this.managedCursor = cursor;
+        this.vibrator = vibrator;
     }
 
     public void run() {
@@ -133,6 +139,16 @@ class Core {
         }
 
         Log.d("Abhishek", "Alarm started for " + pendingCalls);
+
+        if(pendingCallsList.size()>0)
+            vibrate();
+    }
+
+    private void vibrate() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            vibrator.vibrate(VibrationEffect.createOneShot(250, VibrationEffect.DEFAULT_AMPLITUDE));
+        else
+            vibrator.vibrate(250);
     }
 
     private boolean isCallPendingFor(String contactName) {
@@ -146,7 +162,7 @@ class Core {
         managedCursor.moveToLast();
 
         while (!managedCursor.getString(name).equalsIgnoreCase(contactName)) {
-            Log.d("abhishek",managedCursor.getString(name));
+            Log.d("abhishek", managedCursor.getString(name));
             managedCursor.moveToPrevious();
         }
 
