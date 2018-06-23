@@ -10,11 +10,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
-    private String[] contatList={"dad","omkar","mom"};
+    private String[] contatList = {"dad", "omkar", "mom"};
+    private Core core;
+    private Cursor managedCursor;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -26,33 +32,23 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.READ_CALL_LOG}, 1);
     }
 
-    private void printCallLogs() {
+    private void printCallLogs(Cursor managedCursor) {
         StringBuilder output = new StringBuilder();
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
+        int name = managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
+        int type = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
+
+        while (managedCursor.moveToNext())
+        {
+            Log.d("Abhishek",managedCursor.getString(number)+" "+ managedCursor.getString(name) );
         }
-        Cursor managedCursor = MainActivity.this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
-
-        int number=managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
-        int name=managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
-
-//        while (managedCursor.moveToNext())
-//        {
-//            Log.d("Abhishek",managedCursor.getString(number));
-//        }
 
         managedCursor.moveToLast();
 
-        Log.d("last entry",managedCursor.getString(number));
-        Log.d("last entry",managedCursor.getString(name));
+        Log.d("last entry", managedCursor.getString(number));
+        Log.d("last entry", managedCursor.getString(name));
+        Log.d("last entry type", (Integer.parseInt(managedCursor.getString(type)) == CallLog.Calls.MISSED_TYPE) ? "missed" : "something else");
 
     }
 
@@ -67,18 +63,98 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode)
-        {
-            case 1:{
-                if(grantResults.length>0 && grantResults[0]== PackageManager.PERMISSION_GRANTED)
-                {
-                    Log.d("Abhishek","Permission granted");
-                    printCallLogs();
-                }
-                else
-                    Log.d("Abhishek","Permission denied");
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Abhishek", "Permission granted");
+
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    Cursor managedCursor = this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
+
+                    //printCallLogs(managedCursor);
+
+                    core=new Core(managedCursor);
+                    core.run();
+                } else
+                    Log.d("Abhishek", "Permission denied");
             }
 
         }
+    }
+}
+
+class Core {
+    private String[] contactList = {"dad", "omkar", "mom"};
+    private Cursor managedCursor;
+
+    public Core(Cursor cursor) {
+        this.managedCursor = cursor;
+    }
+
+    public void run() {
+        List<String> pendingCallslist = getPendingCallsList();
+
+        if (pendingCallslist.size() > 0) {
+            scheduleAlarms(pendingCallslist);
+        }
+    }
+
+    private List<String> getPendingCallsList() {
+        List<String> resultList = new ArrayList<>();
+
+        for (int i = 0; i < contactList.length; i++) {
+            if (isCallPendingFor(contactList[i]))
+                resultList.add(contactList[i]);
+        }
+
+        return resultList;
+    }
+
+    private void scheduleAlarms(List<String> pendingCallsList) {
+        // TODO: schedule alarm for 5 minutes after missed call
+
+        startAlarms(pendingCallsList);
+    }
+
+    private void startAlarms(List<String> pendingCallsList) {
+        String pendingCalls = "";
+
+        for (String contact : pendingCallsList) {
+            pendingCalls += contact + " ";
+        }
+
+        Log.d("Abhishek", "Alarm started for " + pendingCalls);
+    }
+
+    private boolean isCallPendingFor(String contactName) {
+
+        //Cursor managedCursor = this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
+
+        int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
+        int name = managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
+        int callType = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
+
+        managedCursor.moveToLast();
+
+        while (!managedCursor.getString(name).equalsIgnoreCase(contactName)) {
+            Log.d("abhishek",managedCursor.getString(name));
+            managedCursor.moveToPrevious();
+        }
+
+        if (Integer.parseInt(managedCursor.getString(callType)) != CallLog.Calls.MISSED_TYPE
+                && (Integer.parseInt(managedCursor.getString(callType)) == CallLog.Calls.INCOMING_TYPE
+                || Integer.parseInt(managedCursor.getString(callType)) == CallLog.Calls.OUTGOING_TYPE))
+            return false;
+
+        return true;
     }
 }
