@@ -61,11 +61,6 @@ public class Core {
             managedCursor.moveToPrevious();
         }
 
-        if (Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) != CallLog.Calls.MISSED_TYPE
-                && (Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) == CallLog.Calls.INCOMING_TYPE
-                || Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) == CallLog.Calls.OUTGOING_TYPE))
-            return false;
-
-        return true;
+        return Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) == CallLog.Calls.MISSED_TYPE;
     }
 }
