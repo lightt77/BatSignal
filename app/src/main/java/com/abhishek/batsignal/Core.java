@@ -3,9 +3,10 @@ package com.abhishek.batsignal;
 import android.database.Cursor;
 import android.os.Vibrator;
 import android.provider.CallLog;
-import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class Core {
@@ -20,20 +21,36 @@ public class Core {
     }
 
     public void run() {
-        List<String> pendingCallslist = getPendingCallsList();
+        List<String> pendingCallslist = getPendingCallsList1();
 
         if (pendingCallslist.size() > 0) {
             scheduleAlarms(pendingCallslist);
         }
     }
 
-    private List<String> getPendingCallsList() {
+    private List<String> getPendingCallsList1()
+    {
         List<String> resultList = new ArrayList<>();
 
-        for (int i = 0; i < contactList.length; i++) {
-            if (isCallPendingFor(contactList[i]))
-                resultList.add(contactList[i]);
+        HashSet<String> contactHashSet = new HashSet<>(Arrays.asList(contactList));
+
+        int nameColumnIndex = managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
+        int callTypeColumnIndex = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
+
+        // start from latest call
+        managedCursor.moveToLast();
+
+        do {
+            if(managedCursor.getString(nameColumnIndex) != null
+                    && contactHashSet.contains(managedCursor.getString(nameColumnIndex).toLowerCase()))
+            {
+                contactHashSet.remove(managedCursor.getString(nameColumnIndex).toLowerCase());
+
+                if(Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) == CallLog.Calls.MISSED_TYPE)
+                    resultList.add(managedCursor.getString(nameColumnIndex));
+            }
         }
+        while (managedCursor.moveToPrevious());
 
         return resultList;
     }
@@ -42,25 +59,5 @@ public class Core {
         // TODO: schedule alarm for 5 minutes after missed call
 
         notifier.startAlarms(pendingCallsList);
-    }
-
-    private boolean isCallPendingFor(String contactName) {
-
-        //Cursor managedCursor = this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
-
-        int numberColumnIndex = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
-        int nameColumnIndex = managedCursor.getColumnIndex(CallLog.Calls.CACHED_NAME);
-        int callTypeColumnIndex = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
-
-        // start from latest call
-        managedCursor.moveToLast();
-
-        while (!(managedCursor.getString(nameColumnIndex) == null ? "" : managedCursor.getString(nameColumnIndex))
-                .equalsIgnoreCase(contactName)) {
-            Log.d("DEBUGTAG", managedCursor.getString(nameColumnIndex) == null ? "null" : managedCursor.getString(nameColumnIndex));
-            managedCursor.moveToPrevious();
-        }
-
-        return Integer.parseInt(managedCursor.getString(callTypeColumnIndex)) == CallLog.Calls.MISSED_TYPE;
     }
 }
