@@ -57,7 +57,7 @@ public class Core {
 
         while (!(managedCursor.getString(nameColumnIndex) == null ? "" : managedCursor.getString(nameColumnIndex))
                 .equalsIgnoreCase(contactName)) {
-            Log.d("DEBUGTAG", managedCursor.getString(nameColumnIndex));
+            Log.d("DEBUGTAG", managedCursor.getString(nameColumnIndex) == null ? "null" : managedCursor.getString(nameColumnIndex));
             managedCursor.moveToPrevious();
         }
 
