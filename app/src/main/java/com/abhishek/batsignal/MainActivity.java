@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                     Cursor managedCursor = this.getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, CallLog.Calls.DATE);
                     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-                    printCallLogs(managedCursor);
+                    //printCallLogs(managedCursor);
 
                     core = new Core(managedCursor, vibrator);
                     core.run();

@@ -21,14 +21,14 @@ public class Core {
     }
 
     public void run() {
-        List<String> pendingCallslist = getPendingCallsList1();
+        List<String> pendingCallslist = getPendingCallsList();
 
         if (pendingCallslist.size() > 0) {
             scheduleAlarms(pendingCallslist);
         }
     }
 
-    private List<String> getPendingCallsList1()
+    private List<String> getPendingCallsList()
     {
         List<String> resultList = new ArrayList<>();
 
