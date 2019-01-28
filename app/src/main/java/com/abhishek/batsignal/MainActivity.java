@@ -11,6 +11,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +53,15 @@ public class MainActivity extends AppCompatActivity {
         core = new Core(managedCursor, vibrator);
 
         core.run();
+
+        TextView view = (TextView) findViewById(R.id.Abhishek);
+
+        StringBuilder viewStringBuilder = new StringBuilder();
+
+        for (String pendingContact : core.getPendingCallsList())
+            viewStringBuilder.append(pendingContact + " ");
+
+        view.setText("" + viewStringBuilder.toString());
     }
 
     @Override

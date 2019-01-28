@@ -13,22 +13,29 @@ public class Core {
     private String[] contactList = {"dad", "omkar", "mom"};
     private Cursor managedCursor;
     private Notifier notifier;
+    private ArrayList<String> pendingCallsList;
 
 
     public Core(Cursor cursor, Vibrator vibrator) {
         this.managedCursor = cursor;
         notifier = new Notifier(vibrator);
+        pendingCallsList = new ArrayList<>();
+    }
+
+    public ArrayList<String> getPendingCallsList() {
+        return pendingCallsList;
     }
 
     public void run() {
-        List<String> pendingCallslist = getPendingCallsList();
+        List<String> pendingCallslist = getAllPendingCalls();
 
         if (pendingCallslist.size() > 0) {
             scheduleAlarms(pendingCallslist);
+            this.pendingCallsList.addAll(pendingCallslist);
         }
     }
 
-    private List<String> getPendingCallsList()
+    private List<String> getAllPendingCalls()
     {
         List<String> resultList = new ArrayList<>();
 
