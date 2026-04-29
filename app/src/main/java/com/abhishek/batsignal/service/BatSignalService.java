@@ -135,7 +135,7 @@ public class BatSignalService extends Service {
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         if (powerManager != null) {
             wakeLock = powerManager.newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    PowerManager.PARTIAL_WAKE_LOCK,
                     "BatSignal::AlertWakeLock"
             );
             wakeLock.acquire(2 * 60 * 1000L); // 2 minutes max
