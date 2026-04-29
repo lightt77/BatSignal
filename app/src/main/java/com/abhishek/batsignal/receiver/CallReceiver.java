@@ -117,6 +117,7 @@ public class CallReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, BatSignalService.class);
         intent.setAction(BatSignalService.ACTION_START);
         intent.putExtra(BatSignalService.EXTRA_CALLER_NAME, callerName);
+        intent.putExtra(BatSignalService.EXTRA_ALERT_TYPE, BatSignalService.ALERT_TYPE_PHONE_CALL);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
         PendingIntent pendingIntent = PendingIntent.getForegroundService(context, 0, intent, flags);

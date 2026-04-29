@@ -31,13 +31,22 @@
     <string name="channel_service_name">BatSignal Service</string>
     <string name="channel_service_desc">Background alert service</string>
     <string name="notif_fg_text">Alerting for missed call from %s</string>
+    <string name="notif_fg_whatsapp_voice">Alerting for missed WhatsApp voice call from %s</string>
+    <string name="notif_fg_whatsapp_video">Alerting for missed WhatsApp video call from %s</string>
+    <string name="notif_fg_whatsapp_message">Alerting for unread WhatsApp messages from %s</string>
     <string name="notif_alert_title">BatSignal</string>
     <string name="notif_alert_text">Missed call from %s</string>
+    <string name="notif_alert_whatsapp_voice">Missed WhatsApp voice call from %s</string>
+    <string name="notif_alert_whatsapp_video">Missed WhatsApp video call from %s</string>
+    <string name="notif_alert_whatsapp_message">Unread WhatsApp message from %s</string>
     <string name="action_stop">Stop</string>
 
     <!-- Alert Activity -->
     <string name="alert_title">BatSignal</string>
     <string name="alert_subtitle">Missed call from %s</string>
+    <string name="alert_subtitle_whatsapp_voice">Missed WhatsApp voice call from %s</string>
+    <string name="alert_subtitle_whatsapp_video">Missed WhatsApp video call from %s</string>
+    <string name="alert_subtitle_whatsapp_message">Unread WhatsApp message from %s</string>
     <string name="alert_dismiss">Dismiss</string>
 
     <!-- Permission dialogs -->

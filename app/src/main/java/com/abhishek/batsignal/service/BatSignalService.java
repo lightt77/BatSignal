@@ -32,6 +32,12 @@ public class BatSignalService extends Service {
     public static final String ACTION_START = "com.abhishek.batsignal.ACTION_START";
     public static final String ACTION_STOP = "com.abhishek.batsignal.ACTION_STOP";
     public static final String EXTRA_CALLER_NAME = "caller_name";
+    public static final String EXTRA_ALERT_TYPE = "alert_type";
+
+    public static final int ALERT_TYPE_PHONE_CALL = 0;
+    public static final int ALERT_TYPE_WHATSAPP_VOICE_CALL = 1;
+    public static final int ALERT_TYPE_WHATSAPP_VIDEO_CALL = 2;
+    public static final int ALERT_TYPE_WHATSAPP_MESSAGE = 3;
 
     private static final long AUTO_STOP_MILLIS = 60_000;
 
@@ -42,16 +48,35 @@ public class BatSignalService extends Service {
     private Handler autoStopHandler;
     private PowerManager.WakeLock wakeLock;
     private String callerName = "Unknown";
+    private int alertType = ALERT_TYPE_PHONE_CALL;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Context appContext = getApplicationContext();
-        this.vibrationController = new VibrationControllerImpl(appContext);
-        this.flashController = new FlashControllerImpl(appContext);
-        this.soundController = new SoundControllerImpl(appContext);
-        this.notificationHelper = new NotificationHelper(appContext);
-        this.autoStopHandler = new Handler(getMainLooper());
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        String action = intent.getAction();
+        if (ACTION_STOP.equals(action)) {
+            stopAlert();
+            return START_NOT_STICKY;
+        }
+
+        if (!ACTION_START.equals(action)) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
+        this.callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
+        if (callerName == null || callerName.isEmpty()) {
+            callerName = "Unknown";
+        }
+        this.alertType = intent.getIntExtra(EXTRA_ALERT_TYPE, ALERT_TYPE_PHONE_CALL);
+
+        startForeground(1, notificationHelper.buildForegroundNotification(callerName, alertType));
+        startAlert();
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -111,7 +136,7 @@ public class BatSignalService extends Service {
         }
 
         // Full-screen alert notification
-        notificationHelper.showAlertNotification(callerName);
+        notificationHelper.showAlertNotification(callerName, alertType);
 
         // Auto-stop safety net
         autoStopHandler.postDelayed(this::stopAlert, AUTO_STOP_MILLIS);

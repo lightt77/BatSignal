@@ -19,6 +19,7 @@ import com.abhishek.batsignal.service.BatSignalService;
 public class AlertActivity extends AppCompatActivity {
 
     public static final String EXTRA_CALLER_NAME = "caller_name";
+    public static final String EXTRA_ALERT_TYPE = "alert_type";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,16 +46,32 @@ public class AlertActivity extends AppCompatActivity {
         if (callerName == null || callerName.isEmpty()) {
             callerName = "Unknown";
         }
+        int alertType = getIntent().getIntExtra(EXTRA_ALERT_TYPE,
+                com.abhishek.batsignal.service.BatSignalService.ALERT_TYPE_PHONE_CALL);
 
         TextView title = findViewById(R.id.alert_title);
         TextView subtitle = findViewById(R.id.alert_subtitle);
         Button dismissButton = findViewById(R.id.alert_dismiss);
 
         title.setText(getString(R.string.alert_title));
-        subtitle.setText(getString(R.string.alert_subtitle, callerName));
+        subtitle.setText(getAlertSubtitle(alertType, callerName));
         dismissButton.setText(getString(R.string.alert_dismiss));
 
         dismissButton.setOnClickListener(v -> dismissAlert());
+    }
+
+    @NonNull
+    private String getAlertSubtitle(int alertType, @NonNull String callerName) {
+        switch (alertType) {
+            case com.abhishek.batsignal.service.BatSignalService.ALERT_TYPE_WHATSAPP_VOICE_CALL:
+                return getString(R.string.alert_subtitle_whatsapp_voice, callerName);
+            case com.abhishek.batsignal.service.BatSignalService.ALERT_TYPE_WHATSAPP_VIDEO_CALL:
+                return getString(R.string.alert_subtitle_whatsapp_video, callerName);
+            case com.abhishek.batsignal.service.BatSignalService.ALERT_TYPE_WHATSAPP_MESSAGE:
+                return getString(R.string.alert_subtitle_whatsapp_message, callerName);
+            default:
+                return getString(R.string.alert_subtitle, callerName);
+        }
     }
 
     @Override
@@ -62,9 +79,11 @@ public class AlertActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         String callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
+        int alertType = intent.getIntExtra(EXTRA_ALERT_TYPE,
+                com.abhishek.batsignal.service.BatSignalService.ALERT_TYPE_PHONE_CALL);
         if (callerName != null) {
             TextView subtitle = findViewById(R.id.alert_subtitle);
-            subtitle.setText(getString(R.string.alert_subtitle, callerName));
+            subtitle.setText(getAlertSubtitle(alertType, callerName));
         }
     }
 
