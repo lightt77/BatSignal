@@ -3,6 +3,7 @@ package com.abhishek.batsignal.util;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
@@ -17,6 +18,8 @@ import androidx.annotation.NonNull;
 public final class SamsungUtils {
 
     private static final String TAG = "SamsungUtils";
+    private static final String PREFS_NAME = "batsignal_samsung_prefs";
+    private static final String KEY_NEVER_SLEEP_SHOWN = "never_sleep_shown";
 
     private SamsungUtils() {
         // utility class
@@ -78,5 +81,44 @@ public final class SamsungUtils {
         } catch (ActivityNotFoundException e) {
             Log.w(TAG, "DND settings not available");
         }
+    }
+
+    /**
+     * Opens Samsung's "Never sleeping apps" settings if possible.
+     * Falls back to general device care settings.
+     */
+    public static void openSamsungNeverSleepSettings(@NonNull Context context) {
+        // Try deep-linking into Samsung's device care battery settings
+        Intent intent = new Intent();
+        intent.setAction("android.settings.APP_OPEN_BY_DEFAULT_SETTINGS");
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
+        try {
+            context.startActivity(intent);
+            return;
+        } catch (Exception e) {
+            Log.w(TAG, "App open by default settings not available, trying device care");
+        }
+
+        // Fallback to device care
+        intent = new Intent("android.settings.MANAGE_APP_PERMISSIONS");
+        intent.setData(Uri.parse("package:" + context.getPackageName()));
+        try {
+            context.startActivity(intent);
+        } catch (Exception e2) {
+            Log.w(TAG, "Samsung specific settings not available, falling back to app settings");
+            fallbackToAppSettings(context);
+        }
+    }
+
+    public static void markNeverSleepShown(@NonNull Context context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean(KEY_NEVER_SLEEP_SHOWN, true)
+                .apply();
+    }
+
+    public static boolean hasNeverSleepBeenShown(@NonNull Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(KEY_NEVER_SLEEP_SHOWN, false);
     }
 }

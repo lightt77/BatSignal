@@ -59,4 +59,13 @@
 
     <string name="dnd_dialog_title">Do Not Disturb Access</string>
     <string name="dnd_dialog_msg">Please add BatSignal to the list of apps that can interrupt Do Not Disturb mode, so alerts still come through when DND is on.</string>
+
+    <string name="exact_alarm_dialog_title">Exact Alarms Required</string>
+    <string name="exact_alarm_dialog_msg">BatSignal needs permission to schedule exact alarms so your alerts fire on time.\n\nPlease enable "Allow setting alarms and reminders" for BatSignal.</string>
+
+    <string name="samsung_never_sleep_title">Samsung: Keep App Alive</string>
+    <string name="samsung_never_sleep_msg">Samsung aggressively puts apps to sleep.\n\nPlease add BatSignal to "Never sleeping apps" in Settings > Battery > Background usage limits.\n\nAlso ensure "Put unused apps to sleep" does not include BatSignal.</string>
+
+    <string name="perm_done">Done</string>
+    <string name="btn_test_alert">Test Alert Now</string>
 </resources>

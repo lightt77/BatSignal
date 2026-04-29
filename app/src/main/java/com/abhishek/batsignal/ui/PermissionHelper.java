@@ -3,6 +3,7 @@ package com.abhishek.batsignal.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -48,7 +49,9 @@ public class PermissionHelper {
      * Returns true if the wizard was started, false if everything is already granted.
      */
     public boolean startIfNeeded() {
-        if (hasAllRuntimePermissions() && hasBatteryOptimizationDisabled() && hasDndAccess()) {
+        if (hasAllRuntimePermissions() && hasExactAlarmPermission()
+                && hasBatteryOptimizationDisabled() && hasDndAccess()
+                && hasSamsungNeverSleepDone()) {
             if (callback != null) callback.onComplete();
             return false;
         }
@@ -69,10 +72,14 @@ public class PermissionHelper {
     private void showNextDialog() {
         if (!hasAllRuntimePermissions()) {
             showRuntimePermissionDialog();
+        } else if (!hasExactAlarmPermission()) {
+            showExactAlarmDialog();
         } else if (!hasBatteryOptimizationDisabled()) {
             showBatteryOptimizationDialog();
         } else if (!hasDndAccess()) {
             showDndDialog();
+        } else if (!hasSamsungNeverSleepDone()) {
+            showSamsungNeverSleepDialog();
         } else {
             if (callback != null) callback.onComplete();
         }
@@ -92,6 +99,24 @@ public class PermissionHelper {
                     );
                 })
                 .setNegativeButton(R.string.perm_exit, (d, w) -> activity.finish())
+                .show();
+    }
+
+    private void showExactAlarmDialog() {
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.exact_alarm_dialog_title)
+                .setMessage(R.string.exact_alarm_dialog_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.perm_open_settings, (d, w) -> {
+                    Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                    intent.setData(Uri.parse("package:" + activity.getPackageName()));
+                    try {
+                        activity.startActivity(intent);
+                    } catch (Exception e) {
+                        SamsungUtils.fallbackToAppSettings(activity);
+                    }
+                })
+                .setNegativeButton(R.string.perm_skip, (d, w) -> showNextDialog())
                 .show();
     }
 
@@ -119,6 +144,20 @@ public class PermissionHelper {
                 .show();
     }
 
+    private void showSamsungNeverSleepDialog() {
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.samsung_never_sleep_title)
+                .setMessage(R.string.samsung_never_sleep_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.perm_open_settings, (d, w) ->
+                        SamsungUtils.openSamsungNeverSleepSettings(activity))
+                .setNegativeButton(R.string.perm_done, (d, w) -> {
+                    SamsungUtils.markNeverSleepShown(activity);
+                    showNextDialog();
+                })
+                .show();
+    }
+
     @NonNull
     private List<String> getMissingRuntimePermissions() {
         List<String> perms = new ArrayList<>();
@@ -143,6 +182,14 @@ public class PermissionHelper {
         return getMissingRuntimePermissions().isEmpty();
     }
 
+    private boolean hasExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return true;
+        }
+        AlarmManager am = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+        return am != null && am.canScheduleExactAlarms();
+    }
+
     private boolean hasBatteryOptimizationDisabled() {
         return SamsungUtils.isBatteryOptimizationDisabled(activity);
     }
@@ -153,6 +200,10 @@ public class PermissionHelper {
         }
         NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
         return nm != null && nm.isNotificationPolicyAccessGranted();
+    }
+
+    private boolean hasSamsungNeverSleepDone() {
+        return !SamsungUtils.isSamsungDevice() || SamsungUtils.hasNeverSleepBeenShown(activity);
     }
 
     @NonNull

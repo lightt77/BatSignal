@@ -36,6 +36,20 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
+        <!-- Test Alert Button -->
+        <Button
+            android:id="@+id/btn_test_alert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_test_alert"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
         <!-- Delay -->
         <LinearLayout
             android:layout_width="match_parent"

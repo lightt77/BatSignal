@@ -1,5 +1,6 @@
 package com.abhishek.batsignal.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -7,20 +8,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 
 import androidx.annotation.NonNull;
-
-import com.abhishek.batsignal.R;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.abhishek.batsignal.BatSignalApplication;
 import com.abhishek.batsignal.R;
 import com.abhishek.batsignal.data.SettingsRepository;
+import com.abhishek.batsignal.service.BatSignalService;
 
 /**
  * Fragment for configuring alert style and behavior.
@@ -74,6 +75,16 @@ public class SettingsFragment extends Fragment {
         customFlashOnInput = view.findViewById(R.id.input_custom_flash_on);
         customFlashOffInput = view.findViewById(R.id.input_custom_flash_off);
         customFlashContainer = view.findViewById(R.id.container_custom_flash);
+
+        Button testAlertBtn = view.findViewById(R.id.btn_test_alert);
+        testAlertBtn.setOnClickListener(v -> triggerTestAlert());
+    }
+
+    private void triggerTestAlert() {
+        Intent intent = new Intent(requireContext(), BatSignalService.class);
+        intent.setAction(BatSignalService.ACTION_START);
+        intent.putExtra(BatSignalService.EXTRA_CALLER_NAME, "Test Contact");
+        requireContext().startForegroundService(intent);
     }
 
     private void setupSpinners() {

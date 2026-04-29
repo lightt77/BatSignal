@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.CallLog;
 import android.telephony.TelephonyManager;
@@ -45,15 +47,23 @@ public class CallReceiver extends BroadcastReceiver {
         }
 
         String previous = lastState.getAndSet(state);
+        Log.d(TAG, "PHONE_STATE: " + previous + " -> " + state);
 
         // Detect missed call: was RINGING, now IDLE, and never went OFFHOOK
         if (TelephonyManager.EXTRA_STATE_RINGING.equals(previous)
                 && TelephonyManager.EXTRA_STATE_IDLE.equals(state)) {
-            handlePotentialMissedCall(context);
+            Log.d(TAG, "Potential missed call detected. Waiting for call log to be written...");
+            // Delay query because the system writes call log asynchronously.
+            // 800ms is usually enough, but we also check debounce to avoid double-processing.
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                handlePotentialMissedCall(context);
+            }, 800);
         }
     }
 
     private void handlePotentialMissedCall(@NonNull Context context) {
+        Log.d(TAG, "handlePotentialMissedCall() running");
+
         BatSignalApplication app = (BatSignalApplication) context.getApplicationContext();
         SettingsRepository settings = app.getSettingsRepository();
         ContactRepository contacts = app.getContactRepository();
@@ -69,9 +79,15 @@ public class CallReceiver extends BroadcastReceiver {
             return;
         }
 
+        Log.d(TAG, "Latest call log: name=" + entry.name
+                + " number=" + entry.number
+                + " type=" + entry.type
+                + " date=" + entry.date);
+
         // Debounce: don't process the same call twice
-        if (entry.date <= lastProcessedCallTime.get()) {
-            Log.d(TAG, "Already processed call at " + entry.date);
+        long lastProcessed = lastProcessedCallTime.get();
+        if (entry.date <= lastProcessed) {
+            Log.d(TAG, "Already processed call at " + entry.date + " (last=" + lastProcessed + ")");
             return;
         }
 
@@ -81,11 +97,13 @@ public class CallReceiver extends BroadcastReceiver {
         }
 
         if (!contacts.isPriorityContact(entry.name, entry.number)) {
-            Log.d(TAG, "Caller is not a priority contact: " + entry.name + " / " + entry.number);
+            Log.d(TAG, "Caller is not a priority contact: name=" + entry.name + " number=" + entry.number);
+            Log.d(TAG, "Saved contacts: " + contacts.getContacts());
             return;
         }
 
         lastProcessedCallTime.set(entry.date);
+        Log.d(TAG, "PRIORITY MISSED CALL from " + entry.name);
         scheduleAlert(context, entry.name, settings.getDelaySeconds());
     }
 
@@ -108,8 +126,10 @@ public class CallReceiver extends BroadcastReceiver {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+                Log.d(TAG, "Using exact alarm (canScheduleExactAlarms=true)");
             } else {
-                Log.w(TAG, "Exact alarm permission not granted; using inexact alarm");
+                Log.w(TAG, "Exact alarm permission NOT granted! Using inexact alarm.");
+                Log.w(TAG, "Go to Settings > Apps > BatSignal > Alarms & reminders to enable exact alarms.");
                 alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
