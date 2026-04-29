@@ -91,7 +91,9 @@ public class NotificationHelper {
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setAutoCancel(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setOngoing(true)
+                .setAutoCancel(false)
                 .setFullScreenIntent(fullScreenIntent, true)
                 .addAction(0, context.getString(R.string.action_stop), stopIntent);
 

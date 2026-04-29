@@ -4,33 +4,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp"
+    android:gravity="center_horizontal"
+    android:padding="48dp"
     android:background="?attr/colorSurface">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@android:drawable/ic_dialog_alert"
+        android:contentDescription="@string/app_name"
+        android:tint="?attr/colorPrimary"
+        android:layout_marginBottom="32dp" />
 
     <TextView
         android:id="@+id/alert_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="28sp"
+        android:textSize="56sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="24dp" />
 
     <TextView
         android:id="@+id/alert_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="32sp"
         android:textColor="?attr/colorOnSurface"
-        android:layout_marginBottom="48dp" />
+        android:layout_marginBottom="64dp" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2" />
 
     <Button
         android:id="@+id/alert_dismiss"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:paddingHorizontal="48dp"
-        android:paddingVertical="16dp" />
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:textSize="32sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

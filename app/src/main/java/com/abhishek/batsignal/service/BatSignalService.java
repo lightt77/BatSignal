@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.abhishek.batsignal.AlertActivity;
 import com.abhishek.batsignal.BatSignalApplication;
 import com.abhishek.batsignal.data.AlertPatternProvider;
 import com.abhishek.batsignal.data.SettingsRepository;
@@ -114,7 +115,10 @@ public class BatSignalService extends Service {
             soundController.start(settings.isVolumeOverrideEnabled());
         }
 
-        // Full-screen alert notification
+        // Directly launch full-screen alert activity (more reliable than notification alone)
+        launchAlertActivity();
+
+        // Full-screen alert notification as fallback
         notificationHelper.showAlertNotification(callerName, alertType);
 
         // Auto-stop safety net
@@ -133,6 +137,17 @@ public class BatSignalService extends Service {
         releaseWakeLock();
         stopForeground(true);
         stopSelf();
+    }
+
+    private void launchAlertActivity() {
+        Log.d(TAG, "Launching AlertActivity for " + callerName);
+        Intent intent = new Intent(this, AlertActivity.class);
+        intent.putExtra(AlertActivity.EXTRA_CALLER_NAME, callerName);
+        intent.putExtra(AlertActivity.EXTRA_ALERT_TYPE, alertType);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        startActivity(intent);
     }
 
     private void acquireWakeLock() {

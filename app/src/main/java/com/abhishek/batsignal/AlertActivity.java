@@ -1,8 +1,10 @@
 package com.abhishek.batsignal;
 
+import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
@@ -19,12 +21,14 @@ import com.abhishek.batsignal.service.BatSignalService;
  */
 public class AlertActivity extends AppCompatActivity {
 
+    private static final String TAG = "AlertActivity";
     public static final String EXTRA_CALLER_NAME = "caller_name";
     public static final String EXTRA_ALERT_TYPE = "alert_type";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
@@ -36,10 +40,19 @@ public class AlertActivity extends AppCompatActivity {
             );
         }
 
-        getWindow().addFlags(
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                        | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-        );
+        int flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
+            flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+        }
+        getWindow().addFlags(flags);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            KeyguardManager km = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            if (km != null) {
+                km.requestDismissKeyguard(this, null);
+            }
+        }
 
         setContentView(R.layout.activity_alert);
 
