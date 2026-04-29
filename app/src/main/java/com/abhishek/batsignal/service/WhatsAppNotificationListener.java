@@ -31,6 +31,18 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
     private static final String TAG = "WhatsAppListener";
     private static final String WHATSAPP_PACKAGE = "com.whatsapp";
 
+    @Override
+    public void onListenerConnected() {
+        super.onListenerConnected();
+        Log.d(TAG, "Notification listener CONNECTED");
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        super.onListenerDisconnected();
+        Log.d(TAG, "Notification listener DISCONNECTED");
+    }
+
     // Per-notification-key message counts (conversation-level tracking)
     private final Map<String, Integer> keyMessageCounts = new HashMap<>();
     // Per-contact total unread message counts across all their notification keys
@@ -46,10 +58,13 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
 
         String title = getTitle(sbn);
         String text = getText(sbn);
+        String key = sbn.getKey();
 
-        Log.d(TAG, "Posted: title=" + title + " text=" + text);
+        Log.d(TAG, "Posted: key=" + key + " title=" + title + " text=" + text);
+        dumpExtras(sbn);
 
         if (TextUtils.isEmpty(title)) {
+            Log.d(TAG, "Empty title, ignoring");
             return;
         }
 
@@ -124,17 +139,20 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
         int oldCount = keyMessageCounts.getOrDefault(key, 0);
         keyMessageCounts.put(key, messageCount);
 
+        // WhatsApp typically updates the same notification key for new messages in the
+        // same conversation. We can't reliably parse the exact delta because the
+        // notification format varies (inbox-style lines vs single text). Safest
+        // assumption: every post for an existing key means at least 1 new message.
         int delta;
         if (isNewKey) {
-            delta = messageCount;
+            delta = Math.max(1, messageCount);
         } else {
-            delta = messageCount - oldCount;
+            delta = 1;
         }
 
-        if (delta <= 0) {
-            Log.d(TAG, "No new messages for " + title + " (delta=" + delta + ")");
-            return;
-        }
+        Log.d(TAG, "handleMessage: key=" + key + " isNew=" + isNewKey
+                + " parsedCount=" + messageCount + " oldCount=" + oldCount
+                + " delta=" + delta);
 
         int newTotal = contactUnreadCounts.getOrDefault(title, 0) + delta;
         contactUnreadCounts.put(title, newTotal);
@@ -219,6 +237,21 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
         }
 
         return 0;
+    }
+
+    private void dumpExtras(@NonNull StatusBarNotification sbn) {
+        Bundle extras = sbn.getNotification().extras;
+        CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+        Parcelable[] messages = null;
+        try {
+            messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
+        } catch (Exception ignored) {
+        }
+        Log.d(TAG, "dumpExtras: EXTRA_TITLE=" + extras.getCharSequence(Notification.EXTRA_TITLE)
+                + " EXTRA_TEXT=" + extras.getCharSequence(Notification.EXTRA_TEXT)
+                + " EXTRA_TEXT_LINES=" + (lines != null ? lines.length : "null")
+                + " EXTRA_MESSAGES=" + (messages != null ? messages.length : "null")
+                + " ticker=" + sbn.getNotification().tickerText);
     }
 
     @Nullable
