@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,9 +50,9 @@ public class PermissionHelper {
      * Returns true if the wizard was started, false if everything is already granted.
      */
     public boolean startIfNeeded() {
-        if (hasAllRuntimePermissions() && hasExactAlarmPermission()
-                && hasBatteryOptimizationDisabled() && hasDndAccess()
-                && hasSamsungNeverSleepDone()) {
+        if (hasAllRuntimePermissions() && hasNotificationListenerPermission()
+                && hasExactAlarmPermission() && hasBatteryOptimizationDisabled()
+                && hasDndAccess() && hasSamsungNeverSleepDone()) {
             if (callback != null) callback.onComplete();
             return false;
         }
@@ -72,6 +73,8 @@ public class PermissionHelper {
     private void showNextDialog() {
         if (!hasAllRuntimePermissions()) {
             showRuntimePermissionDialog();
+        } else if (!hasNotificationListenerPermission()) {
+            showNotificationListenerDialog();
         } else if (!hasExactAlarmPermission()) {
             showExactAlarmDialog();
         } else if (!hasBatteryOptimizationDisabled()) {
@@ -99,6 +102,23 @@ public class PermissionHelper {
                     );
                 })
                 .setNegativeButton(R.string.perm_exit, (d, w) -> activity.finish())
+                .show();
+    }
+
+    private void showNotificationListenerDialog() {
+        new AlertDialog.Builder(activity)
+                .setTitle(R.string.notif_listener_dialog_title)
+                .setMessage(R.string.notif_listener_dialog_msg)
+                .setCancelable(false)
+                .setPositiveButton(R.string.perm_open_settings, (d, w) -> {
+                    Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+                    try {
+                        activity.startActivity(intent);
+                    } catch (Exception e) {
+                        SamsungUtils.fallbackToAppSettings(activity);
+                    }
+                })
+                .setNegativeButton(R.string.perm_skip, (d, w) -> showNextDialog())
                 .show();
     }
 
@@ -180,6 +200,17 @@ public class PermissionHelper {
 
     private boolean hasAllRuntimePermissions() {
         return getMissingRuntimePermissions().isEmpty();
+    }
+
+    private boolean hasNotificationListenerPermission() {
+        String enabledListeners = Settings.Secure.getString(
+                activity.getContentResolver(),
+                "enabled_notification_listeners"
+        );
+        if (TextUtils.isEmpty(enabledListeners)) {
+            return false;
+        }
+        return enabledListeners.contains(activity.getPackageName());
     }
 
     private boolean hasExactAlarmPermission() {

@@ -71,6 +71,9 @@
     <string name="dnd_dialog_title">Do Not Disturb Access</string>
     <string name="dnd_dialog_msg">Please add BatSignal to the list of apps that can interrupt Do Not Disturb mode, so alerts still come through when DND is on.</string>
 
+    <string name="notif_listener_dialog_title">Notification Access Required</string>
+    <string name="notif_listener_dialog_msg">BatSignal needs access to your notifications to detect WhatsApp missed calls and unread messages.\n\nPlease enable BatSignal in the notification access settings.</string>
+
     <string name="exact_alarm_dialog_title">Exact Alarms Required</string>
     <string name="exact_alarm_dialog_msg">BatSignal needs permission to schedule exact alarms so your alerts fire on time.\n\nPlease enable "Allow setting alarms and reminders" for BatSignal.</string>
 
