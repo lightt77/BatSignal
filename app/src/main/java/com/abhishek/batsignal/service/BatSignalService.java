@@ -79,34 +79,6 @@ public class BatSignalService extends Service {
         return START_NOT_STICKY;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            stopSelf();
-            return START_NOT_STICKY;
-        }
-
-        String action = intent.getAction();
-        if (ACTION_STOP.equals(action)) {
-            stopAlert();
-            return START_NOT_STICKY;
-        }
-
-        if (!ACTION_START.equals(action)) {
-            stopSelf();
-            return START_NOT_STICKY;
-        }
-
-        this.callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
-        if (callerName == null || callerName.isEmpty()) {
-            callerName = "Unknown";
-        }
-
-        startForeground(1, notificationHelper.buildForegroundNotification(callerName));
-        startAlert();
-        return START_NOT_STICKY;
-    }
-
     private void startAlert() {
         Log.d(TAG, "Starting alert for " + callerName);
         acquireWakeLock();
