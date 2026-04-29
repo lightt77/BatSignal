@@ -73,8 +73,15 @@ public class BatSignalService extends Service {
             callerName = "Unknown";
         }
         this.alertType = intent.getIntExtra(EXTRA_ALERT_TYPE, ALERT_TYPE_PHONE_CALL);
+        Log.d(TAG, "onStartCommand: caller=" + callerName + " type=" + alertType);
 
-        startForeground(1, notificationHelper.buildForegroundNotification(callerName, alertType));
+        try {
+            startForeground(1, notificationHelper.buildForegroundNotification(callerName, alertType));
+        } catch (Exception e) {
+            Log.e(TAG, "startForeground failed", e);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         startAlert();
         return START_NOT_STICKY;
     }
@@ -153,12 +160,14 @@ public class BatSignalService extends Service {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        autoStopHandler.removeCallbacksAndMessages(null);
-        vibrationController.stop();
-        flashController.stop();
-        soundController.stop();
-        releaseWakeLock();
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate()");
+        Context appContext = getApplicationContext();
+        this.vibrationController = new VibrationControllerImpl(appContext);
+        this.flashController = new FlashControllerImpl(appContext);
+        this.soundController = new SoundControllerImpl(appContext);
+        this.notificationHelper = new NotificationHelper(appContext);
+        this.autoStopHandler = new Handler(getMainLooper());
     }
 }

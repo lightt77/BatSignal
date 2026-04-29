@@ -120,26 +120,35 @@ public class CallReceiver extends BroadcastReceiver {
         intent.putExtra(BatSignalService.EXTRA_ALERT_TYPE, BatSignalService.ALERT_TYPE_PHONE_CALL);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
-        PendingIntent pendingIntent = PendingIntent.getForegroundService(context, 0, intent, flags);
+        PendingIntent pendingIntent;
+        try {
+            pendingIntent = PendingIntent.getForegroundService(context, 0, intent, flags);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to create PendingIntent for service", e);
+            return;
+        }
 
         long triggerAtMillis = SystemClock.elapsedRealtime() + (delaySeconds * 1000L);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager.canScheduleExactAlarms()) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+                    Log.d(TAG, "Using exact alarm (canScheduleExactAlarms=true)");
+                } else {
+                    Log.w(TAG, "Exact alarm permission NOT granted! Using inexact alarm.");
+                    Log.w(TAG, "Go to Settings > Apps > BatSignal > Alarms & reminders to enable exact alarms.");
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
-                Log.d(TAG, "Using exact alarm (canScheduleExactAlarms=true)");
             } else {
-                Log.w(TAG, "Exact alarm permission NOT granted! Using inexact alarm.");
-                Log.w(TAG, "Go to Settings > Apps > BatSignal > Alarms & reminders to enable exact alarms.");
-                alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
             }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
-        } else {
-            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, pendingIntent);
+            Log.d(TAG, "Scheduled alert for " + callerName + " in " + delaySeconds + "s");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to schedule alarm", e);
         }
-
-        Log.d(TAG, "Scheduled alert for " + callerName + " in " + delaySeconds + "s");
     }
 
     private CallLogEntry queryLatestCallLog(@NonNull Context context) {

@@ -179,7 +179,12 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
         intent.setAction(BatSignalService.ACTION_START);
         intent.putExtra(BatSignalService.EXTRA_CALLER_NAME, contactName);
         intent.putExtra(BatSignalService.EXTRA_ALERT_TYPE, alertType);
-        startForegroundService(intent);
+        try {
+            startForegroundService(intent);
+            Log.d(TAG, "triggerAlert: started service for " + contactName);
+        } catch (Exception e) {
+            Log.e(TAG, "triggerAlert: failed to start service", e);
+        }
     }
 
     private boolean isPriorityContact(@NonNull String displayName) {
