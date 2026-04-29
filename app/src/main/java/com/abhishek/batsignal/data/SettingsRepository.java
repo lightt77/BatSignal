@@ -24,6 +24,8 @@ public class SettingsRepository {
     private static final String KEY_SOUND_ENABLED = "sound_enabled";
     private static final String KEY_VOLUME_OVERRIDE = "volume_override";
     private static final String KEY_FULL_SCREEN_ALERT = "full_screen_alert";
+    private static final String KEY_WHATSAPP_ENABLED = "whatsapp_enabled";
+    private static final String KEY_WHATSAPP_THRESHOLD = "whatsapp_threshold";
 
     private static final String DEFAULT_VIBRATION_PRESET = "SOS";
     private static final String DEFAULT_FLASH_PRESET = "Strobe";
@@ -119,6 +121,22 @@ public class SettingsRepository {
 
     public void setFullScreenAlertEnabled(boolean enabled) {
         prefs.edit().putBoolean(KEY_FULL_SCREEN_ALERT, enabled).apply();
+    }
+
+    public boolean isWhatsappEnabled() {
+        return prefs.getBoolean(KEY_WHATSAPP_ENABLED, true);
+    }
+
+    public void setWhatsappEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_WHATSAPP_ENABLED, enabled).apply();
+    }
+
+    public int getWhatsappMessageThreshold() {
+        return prefs.getInt(KEY_WHATSAPP_THRESHOLD, 3);
+    }
+
+    public void setWhatsappMessageThreshold(int threshold) {
+        prefs.edit().putInt(KEY_WHATSAPP_THRESHOLD, Math.max(1, Math.min(20, threshold))).apply();
     }
 
     @NonNull

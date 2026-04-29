@@ -78,6 +78,22 @@ public class ContactRepository {
         return false;
     }
 
+    /**
+     * Checks whether the given display name matches any stored priority contact by name only.
+     * Used for WhatsApp notification matching where phone number is not available.
+     */
+    public synchronized boolean isPriorityContactByName(@Nullable String displayName) {
+        if (getContactsInternal().isEmpty() || displayName == null || displayName.isEmpty()) {
+            return false;
+        }
+        for (Contact contact : getContactsInternal()) {
+            if (contact.getDisplayName().equalsIgnoreCase(displayName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @NonNull
     private List<Contact> getContactsInternal() {
         String json = prefs.getString(KEY_CONTACTS, null);
