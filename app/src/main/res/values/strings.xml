@@ -1,3 +1,62 @@
 <resources>
     <string name="app_name">BatSignal</string>
+
+    <!-- Navigation -->
+    <string name="nav_contacts">Contacts</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Contacts -->
+    <string name="empty_contacts">No priority contacts added.\nTap + to add from your address book.</string>
+    <string name="add_contact">Add contact</string>
+    <string name="contact_pick_failed">Failed to read contact</string>
+
+    <!-- Settings labels -->
+    <string name="setting_enabled">Enable BatSignal</string>
+    <string name="setting_delay">Delay (seconds)</string>
+    <string name="setting_vibration">Vibration pattern</string>
+    <string name="setting_flash">Flash pattern</string>
+    <string name="setting_sound">Alert sound</string>
+    <string name="setting_volume_override">Override alarm volume to max</string>
+    <string name="setting_fullscreen">Show full-screen alert</string>
+
+    <string name="hint_custom_vibration">Comma-separated ms (wait,vibrate,wait,vibrate…)</string>
+    <string name="hint_custom_flash_on">Comma-separated ON durations in ms</string>
+    <string name="hint_custom_flash_off">Comma-separated OFF durations in ms</string>
+
+    <!-- Notifications -->
+    <string name="channel_alert_name">BatSignal Alerts</string>
+    <string name="channel_alert_desc">High-priority missed call alerts</string>
+    <string name="channel_service_name">BatSignal Service</string>
+    <string name="channel_service_desc">Background alert service</string>
+    <string name="notif_fg_text">Alerting for missed call from %s</string>
+    <string name="notif_alert_title">BatSignal</string>
+    <string name="notif_alert_text">Missed call from %s</string>
+    <string name="action_stop">Stop</string>
+
+    <!-- Alert Activity -->
+    <string name="alert_title">BatSignal</string>
+    <string name="alert_subtitle">Missed call from %s</string>
+    <string name="alert_dismiss">Dismiss</string>
+
+    <!-- Permission dialogs -->
+    <string name="perm_dialog_title">Permissions Required</string>
+    <string name="perm_dialog_msg">BatSignal needs the following permissions to detect missed calls and alert you:</string>
+    <string name="perm_grant">Grant</string>
+    <string name="perm_exit">Exit</string>
+    <string name="perm_open_settings">Open Settings</string>
+    <string name="perm_skip">Skip</string>
+
+    <string name="perm_phone_state">Phone state (detect incoming calls)</string>
+    <string name="perm_call_log">Call log (check for missed calls)</string>
+    <string name="perm_contacts">Contacts (pick priority contacts)</string>
+    <string name="perm_camera">Camera (flashlight control)</string>
+    <string name="perm_vibrate">Vibration</string>
+    <string name="perm_notifications">Notifications</string>
+
+    <string name="battery_dialog_title">Disable Battery Optimization</string>
+    <string name="battery_dialog_msg">Please disable battery optimization for BatSignal so it can alert you reliably even when the phone is asleep.</string>
+    <string name="battery_dialog_msg_samsung">Samsung devices are aggressive with background apps.\n\nPlease set BatSignal to \"Unrestricted\" in battery settings, and also allow background activity.</string>
+
+    <string name="dnd_dialog_title">Do Not Disturb Access</string>
+    <string name="dnd_dialog_msg">Please add BatSignal to the list of apps that can interrupt Do Not Disturb mode, so alerts still come through when DND is on.</string>
 </resources>

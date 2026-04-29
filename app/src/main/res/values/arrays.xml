@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="vibration_presets">
+        <item>Off</item>
+        <item>Short Buzz</item>
+        <item>Long Pulse</item>
+        <item>Double Tap</item>
+        <item>SOS</item>
+        <item>Heartbeat</item>
+        <item>Custom</item>
+    </string-array>
+
+    <string-array name="flash_presets">
+        <item>Off</item>
+        <item>Single</item>
+        <item>Strobe</item>
+        <item>Slow Pulse</item>
+        <item>SOS</item>
+        <item>Custom</item>
+    </string-array>
+</resources>
