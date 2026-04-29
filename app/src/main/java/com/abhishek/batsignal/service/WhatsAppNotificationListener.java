@@ -49,6 +49,9 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
     private final Map<String, Integer> contactUnreadCounts = new HashMap<>();
     // Contacts we've already alerted for; reset when their unread count drops to zero
     private final Set<String> alertedContacts = new HashSet<>();
+    // Deduplicate rapid duplicate notifications for the same contact
+    private final Map<String, Long> lastPostTimePerContact = new HashMap<>();
+    private static final long DEDUP_WINDOW_MS = 800;
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
@@ -65,6 +68,14 @@ public class WhatsAppNotificationListener extends NotificationListenerService {
 
         if (TextUtils.isEmpty(title)) {
             Log.d(TAG, "Empty title, ignoring");
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        long lastPost = lastPostTimePerContact.getOrDefault(title, 0L);
+        lastPostTimePerContact.put(title, now);
+        if (now - lastPost < DEDUP_WINDOW_MS) {
+            Log.d(TAG, "Duplicate post for " + title + " within " + (now - lastPost) + "ms, ignoring");
             return;
         }
 
