@@ -2,6 +2,7 @@ package com.abhishek.batsignal.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,7 +59,7 @@ public class ContactRepository {
 
     /**
      * Checks whether the given call details match any stored priority contact.
-     * Matches on display name (case-insensitive) OR normalized phone number.
+     * Matches on display name (fuzzy normalized) OR normalized phone number (exact).
      */
     public synchronized boolean isPriorityContact(@Nullable String displayName, @Nullable String phoneNumber) {
         if (getContactsInternal().isEmpty()) {
@@ -68,10 +69,12 @@ public class ContactRepository {
         for (Contact contact : getContactsInternal()) {
             boolean nameMatch = displayName != null
                     && !displayName.isEmpty()
-                    && contact.getDisplayName().equalsIgnoreCase(displayName);
+                    && namesMatch(contact.getDisplayName(), displayName);
             boolean numberMatch = !normalizedIncoming.isEmpty()
                     && contact.getNormalizedPhoneNumber().equals(normalizedIncoming);
             if (nameMatch || numberMatch) {
+                Log.d("ContactRepository", "Priority match: saved='" + contact.getDisplayName()
+                        + "' incoming='" + displayName + "' number='" + phoneNumber + "'");
                 return true;
             }
         }
@@ -87,11 +90,27 @@ public class ContactRepository {
             return false;
         }
         for (Contact contact : getContactsInternal()) {
-            if (contact.getDisplayName().equalsIgnoreCase(displayName)) {
+            if (namesMatch(contact.getDisplayName(), displayName)) {
+                Log.d("ContactRepository", "Priority name match: saved='" + contact.getDisplayName()
+                        + "' incoming='" + displayName + "'");
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean namesMatch(@Nullable String a, @Nullable String b) {
+        if (a == null || b == null) return false;
+        String na = normalizeName(a);
+        String nb = normalizeName(b);
+        return na.contains(nb) || nb.contains(na);
+    }
+
+    private static String normalizeName(@NonNull String s) {
+        return s.toLowerCase()
+                .replaceAll("[^a-z0-9 ]", "")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     @NonNull
