@@ -18,6 +18,8 @@
     <string name="setting_sound">Alert sound</string>
     <string name="setting_volume_override">Override alarm volume to max</string>
     <string name="setting_fullscreen">Show full-screen alert</string>
+    <string name="setting_whatsapp_enabled">Monitor WhatsApp notifications</string>
+    <string name="setting_whatsapp_threshold">Unread message threshold</string>
 
     <string name="hint_custom_vibration">Comma-separated ms (wait,vibrate,wait,vibrate…)</string>
     <string name="hint_custom_flash_on">Comma-separated ON durations in ms</string>

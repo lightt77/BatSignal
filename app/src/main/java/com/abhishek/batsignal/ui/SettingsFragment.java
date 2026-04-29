@@ -31,10 +31,13 @@ public class SettingsFragment extends Fragment {
     private SettingsRepository settings;
 
     private Switch masterSwitch;
+    private Switch whatsappSwitch;
     private Switch soundSwitch;
     private Switch volumeSwitch;
     private Switch fullScreenSwitch;
     private EditText delayInput;
+    private EditText whatsappThresholdInput;
+    private LinearLayout whatsappThresholdContainer;
     private Spinner vibeSpinner;
     private EditText customVibeInput;
     private LinearLayout customVibeContainer;
@@ -64,10 +67,13 @@ public class SettingsFragment extends Fragment {
 
     private void bindViews(@NonNull View view) {
         masterSwitch = view.findViewById(R.id.switch_master);
+        whatsappSwitch = view.findViewById(R.id.switch_whatsapp);
         soundSwitch = view.findViewById(R.id.switch_sound);
         volumeSwitch = view.findViewById(R.id.switch_volume_override);
         fullScreenSwitch = view.findViewById(R.id.switch_fullscreen);
         delayInput = view.findViewById(R.id.input_delay);
+        whatsappThresholdInput = view.findViewById(R.id.input_whatsapp_threshold);
+        whatsappThresholdContainer = view.findViewById(R.id.container_whatsapp_threshold);
         vibeSpinner = view.findViewById(R.id.spinner_vibration);
         customVibeInput = view.findViewById(R.id.input_custom_vibration);
         customVibeContainer = view.findViewById(R.id.container_custom_vibration);
@@ -99,10 +105,12 @@ public class SettingsFragment extends Fragment {
 
     private void loadSettings() {
         masterSwitch.setChecked(settings.isEnabled());
+        whatsappSwitch.setChecked(settings.isWhatsappEnabled());
         soundSwitch.setChecked(settings.isSoundEnabled());
         volumeSwitch.setChecked(settings.isVolumeOverrideEnabled());
         fullScreenSwitch.setChecked(settings.isFullScreenAlertEnabled());
         delayInput.setText(String.valueOf(settings.getDelaySeconds()));
+        whatsappThresholdInput.setText(String.valueOf(settings.getWhatsappMessageThreshold()));
 
         setSpinnerSelection(vibeSpinner, settings.getVibrationPreset());
         setSpinnerSelection(flashSpinner, settings.getFlashPreset());
@@ -112,10 +120,15 @@ public class SettingsFragment extends Fragment {
         customFlashOffInput.setText(joinIntArray(settings.getCustomFlashOffPattern()));
 
         updateCustomVisibility();
+        updateWhatsappVisibility();
     }
 
     private void setupListeners() {
         masterSwitch.setOnCheckedChangeListener((btn, checked) -> settings.setEnabled(checked));
+        whatsappSwitch.setOnCheckedChangeListener((btn, checked) -> {
+            settings.setWhatsappEnabled(checked);
+            updateWhatsappVisibility();
+        });
         soundSwitch.setOnCheckedChangeListener((btn, checked) -> settings.setSoundEnabled(checked));
         volumeSwitch.setOnCheckedChangeListener((btn, checked) -> settings.setVolumeOverrideEnabled(checked));
         fullScreenSwitch.setOnCheckedChangeListener((btn, checked) -> settings.setFullScreenAlertEnabled(checked));
@@ -166,6 +179,12 @@ public class SettingsFragment extends Fragment {
         } catch (NumberFormatException ignored) {
         }
 
+        try {
+            int threshold = Integer.parseInt(whatsappThresholdInput.getText().toString().trim());
+            settings.setWhatsappMessageThreshold(threshold);
+        } catch (NumberFormatException ignored) {
+        }
+
         saveCustomVibration();
         saveCustomFlash();
     }
@@ -191,6 +210,10 @@ public class SettingsFragment extends Fragment {
 
         boolean flashCustom = "Custom".equals(flashSpinner.getSelectedItem());
         customFlashContainer.setVisibility(flashCustom ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateWhatsappVisibility() {
+        whatsappThresholdContainer.setVisibility(whatsappSwitch.isChecked() ? View.VISIBLE : View.GONE);
     }
 
     private void setSpinnerSelection(@NonNull Spinner spinner, @NonNull String value) {

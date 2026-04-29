@@ -50,6 +50,57 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
+        <!-- WhatsApp Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/setting_whatsapp_enabled"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switch_whatsapp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- WhatsApp Threshold -->
+        <LinearLayout
+            android:id="@+id/container_whatsapp_threshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/setting_whatsapp_threshold"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/input_whatsapp_threshold"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="2"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
         <!-- Delay -->
         <LinearLayout
             android:layout_width="match_parent"
